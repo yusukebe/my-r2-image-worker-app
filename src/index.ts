@@ -3,6 +3,8 @@ import { sha256 } from 'hono/utils/crypto'
 import { getExtension } from 'hono/utils/mime'
 import { basicAuth } from 'hono/basic-auth'
 import { cache } from 'hono/cache'
+import * as z from 'zod'
+import { zValidator } from '@hono/zod-validator'
 
 const app = new Hono<{ Bindings: CloudflareBindings }>()
 
@@ -29,16 +31,25 @@ app.get(
   })
 )
 
-app.get('/:key', async (c) => {
+const schema = z.object({
+  width: z.coerce.number().optional(),
+  height: z.coerce.number().optional()
+})
+
+app.get('/:key', zValidator('query', schema), async (c) => {
   const key = c.req.param('key')
 
   const object = await c.env.BUCKET.get(key)
   if (!object) return c.notFound()
 
-  const contentType = object.httpMetadata?.contentType ?? ''
-  return c.body(object.body, 200, {
-    'Content-Type': contentType,
-  })
+  const { width, height } = c.req.valid('query')
+
+  const result = await c.env.IMAGES.input(object.body)
+    .transform({ width, height })
+    //@ts-expect-error the contentType maybe valid format
+    .output({ format: object.httpMetadata?.contentType ?? 'image/png' })
+
+  return result.response()
 })
 
 export default app
