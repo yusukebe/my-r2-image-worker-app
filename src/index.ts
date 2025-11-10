@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { sha256 } from 'hono/utils/crypto'
 import { getExtension } from 'hono/utils/mime'
 import { basicAuth } from 'hono/basic-auth'
+import { cache } from 'hono/cache'
 
 const app = new Hono<{ Bindings: CloudflareBindings }>()
 
@@ -20,6 +21,13 @@ app.put('/upload', async (c) => {
 
   return c.text(key)
 })
+
+app.get(
+  '*',
+  cache({
+    cacheName: 'my-r2-image-worker-app'
+  })
+)
 
 app.get('/:key', async (c) => {
   const key = c.req.param('key')
