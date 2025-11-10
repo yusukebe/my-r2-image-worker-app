@@ -1,12 +1,15 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "my-r2-image-worker-app",
-	"main": "src/index.ts",
-	"compatibility_date": "2025-11-10",
-	"r2_buckets": [
-		{
-			"bucket_name": "my-r2-image-worker-bucket",
-			"binding": "BUCKET"
-		}
-	]
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "my-r2-image-worker-app",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-11-10",
+  "r2_buckets": [
+    {
+      "bucket_name": "my-r2-image-worker-bucket",
+      "binding": "BUCKET"
+    }
+  ],
+  "images": {
+    "binding": "IMAGES"
+  }
 }
